@@ -170,6 +170,119 @@ class VertexSearchClient:
         except Exception as e:
             raise Exception(f"Search failed: {e}")
     
+    def get_answer_rest_api(
+        self,
+        query: str,
+        query_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        enable_related_questions: bool = True
+    ) -> AnswerResponse:
+        """
+        Generate an answer for a query using REST API.
+        
+        Args:
+            query: The query text
+            query_id: Optional query ID from previous search
+            session_id: Optional session ID for conversational context
+            enable_related_questions: Whether to generate related questions
+            
+        Returns:
+            AnswerResponse object
+            
+        Raises:
+            Exception: If the API call fails
+        """
+        try:
+            # Get access token
+            token = self._get_access_token()
+            
+            # Prepare the REST API request for answer generation
+            url = f"{self.base_url}/projects/{self.project_id}/locations/{self.location}/collections/default_collection/engines/{self.engine_id}/servingConfigs/default_search:answer"
+            
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "query": {
+                    "text": query,
+                    "queryId": query_id
+                },
+                "relatedQuestionsSpec": {
+                    "enable": enable_related_questions
+                },
+                "answerGenerationSpec": {
+                    "ignoreAdversarialQuery": True,
+                    "ignoreNonAnswerSeekingQuery": False,
+                    "ignoreLowRelevantContent": False
+                }
+            }
+            
+            # Add session if provided
+            if session_id:
+                data["session"] = session_id
+            
+            # Make the REST API call
+            response = requests.post(url, headers=headers, json=data)
+            
+            if response.status_code != 200:
+                raise Exception(f"REST API answer failed: {response.status_code} - {response.text}")
+            
+            result = response.json()
+            
+            # Parse the response
+            answer_text = result.get('answer', '')
+            related_questions = []
+            search_results = []
+            
+            # Extract related questions
+            if 'relatedQuestions' in result:
+                related_questions = [q.get('text', '') for q in result['relatedQuestions']]
+            
+            # Extract search results if available
+            if 'searchResults' in result:
+                for item in result['searchResults']:
+                    document = item.get('document', {})
+                    derived_data = document.get('derivedStructData', {})
+                    
+                    title = derived_data.get('title', '')
+                    uri = derived_data.get('link', None)
+                    
+                    content_parts = []
+                    for snippet_obj in derived_data.get('snippets', []):
+                        if isinstance(snippet_obj, dict) and 'snippet' in snippet_obj:
+                            content_parts.append(snippet_obj['snippet'])
+                    
+                    content = ' '.join(content_parts) if content_parts else ''
+                    
+                    metadata = dict(derived_data)
+                    
+                    score = None
+                    rank_signals = item.get('rankSignals', {})
+                    if 'defaultRank' in rank_signals:
+                        score = float(rank_signals['defaultRank'])
+                    
+                    search_result = SearchResult(
+                        title=title,
+                        content=content,
+                        uri=uri,
+                        metadata=metadata,
+                        score=score
+                    )
+                    search_results.append(search_result)
+            
+            return AnswerResponse(
+                answer=answer_text,
+                related_questions=related_questions,
+                search_results=search_results,
+                session_id=session_id,
+                query_id=query_id
+            )
+            
+        except Exception as e:
+            raise Exception(f"Answer generation failed: {e}")
+    
     def get_answer(
         self,
         query: str,

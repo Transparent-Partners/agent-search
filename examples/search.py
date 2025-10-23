@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Conversational search example using Vertex AI Search API.
+Search example using Vertex AI Search API.
 
-This example demonstrates how to perform multi-turn conversations
-with follow-up questions and session management.
+This example demonstrates how to perform search queries
+with SOW analysis and document discovery.
 """
 
 import sys
@@ -17,8 +17,8 @@ from vertex_search import VertexSearchClient
 
 
 def main():
-    """Run conversational search example."""
-    print("💬 Vertex AI Search - Conversational Search Example")
+    """Run search example."""
+    print("🔍 Vertex AI Search - Search Example")
     print("=" * 60)
     
     # Initialize the client
@@ -51,7 +51,7 @@ def main():
     session_id = None
     user_pseudo_id = "demo_user"
     
-    print("🎯 Starting conversational search session...")
+    print("🎯 Starting search session...")
     print(f"👤 User: {user_pseudo_id}")
     print()
     
@@ -162,7 +162,7 @@ def main():
     print("💡 For multi-turn conversations, contact Google Support for allowlisting")
     
     print()
-    print("✅ Conversational search example completed!")
+    print("✅ Search example completed!")
 
 
 if __name__ == "__main__":

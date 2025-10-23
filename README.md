@@ -89,7 +89,34 @@ This example demonstrates:
 - Document metadata extraction
 - Google Drive link access
 
-### 2. SOW Analysis
+### 2. Search with SOW Analysis
+
+Run the search example:
+
+```bash
+python examples/search.py
+```
+
+This example demonstrates:
+- "How many SOWs are there?" - SOW counting and analysis
+- "Can you summarize CHR_SOW#1...?" - Specific SOW document discovery
+- "Can you summarize another SOW?" - Available SOW listing
+
+### 3. AI Answer Generation
+
+Run the answer generation example:
+
+```bash
+python examples/get_answers.py
+```
+
+This example demonstrates:
+- AI-powered answer generation using REST API
+- Related questions generation
+- Comprehensive document summaries
+- Business context and insights
+
+### 4. SOW Analysis Test
 
 Run the SOW analysis test:
 
@@ -101,19 +128,6 @@ This example demonstrates:
 - SOW detection and counting
 - Document grouping by SOW
 - Link extraction and previews
-
-### 3. Conversational Search
-
-Run the conversational search example:
-
-```bash
-python examples/conversational_search.py
-```
-
-This example demonstrates:
-- "How many SOWs are there?" - SOW counting and analysis
-- "Can you summarize CHR_SOW#1...?" - Specific SOW document discovery
-- "Can you summarize another SOW?" - Available SOW listing
 
 ## API Reference
 
@@ -150,6 +164,18 @@ Perform a basic search query using REST API.
 
 **Returns:** List of `SearchResult` objects with titles, links, content, and metadata
 
+##### `get_answer_rest_api(query, **kwargs) -> AnswerResponse`
+
+Generate an AI-powered answer using REST API.
+
+**Parameters:**
+- `query` (str): The query text
+- `query_id` (str, optional): Query ID from previous search
+- `session_id` (str, optional): Session ID for conversational context
+- `enable_related_questions` (bool): Generate related questions (default: True)
+
+**Returns:** `AnswerResponse` object with AI-generated answer, related questions, and search results
+
 ##### `search_and_analyze_sows(query, page_size) -> Dict[str, Any]`
 
 Search for SOWs and provide detailed analysis.
@@ -171,15 +197,15 @@ Extract and analyze SOW information from search results.
 
 **Example:**
 ```python
+# Get AI-generated answer
+answer_response = client.get_answer_rest_api("How many SOWs are there?")
+print(f"Answer: {answer_response.answer}")
+print(f"Related Questions: {answer_response.related_questions}")
+
 # Get SOW analysis
 sow_analysis = client.search_and_analyze_sows(query="SOW", page_size=50)
 analysis = sow_analysis['analysis']
-
 print(f"Found {analysis['total_sows']} unique SOWs")
-for sow_key, sow_info in analysis['sows'].items():
-    print(f"{sow_key}: {sow_info['primary_title']}")
-    print(f"  Documents: {len(sow_info['documents'])}")
-    print(f"  Link: {sow_info['documents'][0]['link']}")
 ```
 
 ### Data Models
@@ -405,7 +431,9 @@ For issues and questions:
 
 ### Key Features
 - ✅ **Working Search**: REST API implementation (gRPC has known issues)
+- ✅ **AI Answer Generation**: REST API answer endpoint with AI-powered summaries
 - ✅ **SOW Analysis**: Intelligent SOW detection and grouping
 - ✅ **Real Data**: Tested with Checkers data store (5 SOWs, 45+ documents)
 - ✅ **Google Drive Links**: All documents include working URLs
+- ✅ **Related Questions**: AI-generated follow-up questions
 - ✅ **Document Previews**: Content snippets and metadata extraction
