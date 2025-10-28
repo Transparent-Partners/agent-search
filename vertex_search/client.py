@@ -6,9 +6,21 @@ import os
 import json
 import requests
 import subprocess
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 from google.cloud import discoveryengine_v1 as discoveryengine
 from google.api_core import exceptions as gcp_exceptions
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Load .env file from the project root
+    project_root = Path(__file__).parent.parent
+    dotenv_path = project_root / '.env'
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path)
+except ImportError:
+    pass  # dotenv not installed, skip
 
 from .models import SearchResult, AnswerResponse, SearchRequest, AnswerRequest
 from .session import SessionManager
@@ -33,8 +45,8 @@ class VertexSearchClient:
             location: Location of the search engine (default: "global")
             api_version: API version to use (default: "v1alpha")
         """
-        self.project_id = project_id or os.getenv("PROJECT_ID", "622273141210")
-        self.engine_id = engine_id or os.getenv("ENGINE_ID", "checkers_1761176786564")
+        self.project_id = project_id or os.getenv("PROJECT_ID", "transparent-agent-dev")
+        self.engine_id = engine_id or os.getenv("ENGINE_ID", "chr_project_agent_app_v2")
         self.location = location
         self.api_version = api_version
         
